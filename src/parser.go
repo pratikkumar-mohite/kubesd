@@ -18,7 +18,7 @@ type secretData struct {
 type Secret map[string]interface{}
 
 // Read secret object from stdin
-func readObject() (yData *secretData, yComplete *Secret, objectType string){
+func readObject() (yData *secretData, yComplete Secret, objectType string){
 	var yamlData secretData
 	var yamlComplete Secret
 	var secretString strings.Builder
@@ -44,7 +44,7 @@ func readObject() (yData *secretData, yComplete *Secret, objectType string){
 		fmt.Println("The given object is not a Secret object")
 		return
 	}
-	return &yamlData, &yamlComplete, strings.ToLower(yamlData.Type)
+	return &yamlData, yamlComplete, strings.ToLower(yamlData.Type)
 }
 
 // Validate the secret object kind
