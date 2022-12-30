@@ -21,9 +21,9 @@ func decodeOpaque(y *secretData) {
 }
 
 func Decode() {
-	yamlContent, objectType := readObject()
+	yamlDataObject, yamlCompleteObject, objectType := readObject()
 	if objectType == "opaque" {
-		decodeOpaque(yamlContent)
+		decodeOpaque(yamlDataObject)
 	}
-	fmt.Println(yamlContent.Data)
+	printSecretObject(yamlDataObject, yamlCompleteObject)
 }

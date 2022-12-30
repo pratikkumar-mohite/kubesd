@@ -15,9 +15,12 @@ type secretData struct {
 	Data map[string]string `yaml:"data"`
 }
 
+type Secret map[string]interface{}
+
 // Read secret object from stdin
-func readObject() (y *secretData, objectType string){
-	var yamlContent secretData
+func readObject() (yData *secretData, yComplete *Secret, objectType string){
+	var yamlData secretData
+	var yamlComplete Secret
 	var secretString strings.Builder
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Err() != nil {
@@ -27,15 +30,21 @@ func readObject() (y *secretData, objectType string){
 	for scanner.Scan() {
 		secretString.WriteString(scanner.Text()+"\n")
 	}
-	err := yaml.Unmarshal([]byte(secretString.String()),&yamlContent)
+	// only data part
+	err := yaml.Unmarshal([]byte(secretString.String()),&yamlData)
 	if err != nil {
 		fmt.Printf("Failed to decode yaml %v\n",err)
 	}
-	if !isSecretObject(&yamlContent) {
+	// complete yaml object
+	err = yaml.Unmarshal([]byte(secretString.String()),&yamlComplete)
+	if err != nil {
+		fmt.Printf("Failed to decode yaml %v\n",err)
+	}
+	if !isSecretObject(&yamlData) {
 		fmt.Println("The given object is not a Secret object")
 		return
 	}
-	return &yamlContent, strings.ToLower(yamlContent.Type)
+	return &yamlData, &yamlComplete, strings.ToLower(yamlData.Type)
 }
 
 // Validate the secret object kind
