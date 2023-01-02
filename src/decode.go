@@ -23,8 +23,12 @@ func decodeOpaque() {
 
 func Decode() {
 	secretCompleteObject, objectType := readObject()
-	if objectType == "opaque" {
-		decodeOpaque()
+	switch objectType {
+		case "opaque":
+			decodeOpaque()
+		default:
+			fmt.Printf("The secret object is not supported : %v",objectType)
+			return
 	}
 	printSecretObject(secretCompleteObject)
 }
