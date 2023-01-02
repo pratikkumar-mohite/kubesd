@@ -1,15 +1,15 @@
 package src
 
 import (
-	"fmt"
 	base64 "encoding/base64"
+	"fmt"
 )
 
 // Decode the data to secret object
 func decodeBase64(value string) string {
 	decodedData, err := base64.StdEncoding.DecodeString(value)
 	if err != nil {
-		fmt.Printf("Failed to decode object %v",err)
+		fmt.Printf("Failed to decode object %v", err)
 	}
 	return string(decodedData)
 }
@@ -24,11 +24,11 @@ func decodeOpaque() {
 func Decode() {
 	secretCompleteObject, objectType := readObject()
 	switch objectType {
-		case "opaque":
-			decodeOpaque()
-		default:
-			fmt.Printf("The secret object is not supported : %v",objectType)
-			return
+	case "opaque":
+		decodeOpaque()
+	default:
+		fmt.Printf("The secret object is not supported : %v", objectType)
+		return
 	}
 	printSecretObject(secretCompleteObject)
 }

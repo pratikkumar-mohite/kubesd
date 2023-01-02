@@ -16,31 +16,31 @@ var Kind, Type, OutputType string
 var Data map[string]string
 
 // Read secret object from stdin
-func readObject() (sComplete SecretYaml, objectType string){
+func readObject() (sComplete SecretYaml, objectType string) {
 	var secretCompleteObject SecretYaml
 	var secretString strings.Builder
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Err() != nil {
-		fmt.Printf("Failed to read from STDIN %v\n",scanner.Err())
+		fmt.Printf("Failed to read from STDIN %v\n", scanner.Err())
 		return
 	}
 	for scanner.Scan() {
-		secretString.WriteString(scanner.Text()+"\n")
+		secretString.WriteString(scanner.Text() + "\n")
 	}
 
 	// check if data is json
 	OutputType = isJson(secretString.String())
 
 	if OutputType == "json" {
-		err := json.Unmarshal([]byte(secretString.String()),&secretCompleteObject)
+		err := json.Unmarshal([]byte(secretString.String()), &secretCompleteObject)
 		if err != nil {
-			fmt.Printf("Failed to decode object %v\n",err)
+			fmt.Printf("Failed to decode object %v\n", err)
 		}
 
 	} else {
-		err := yaml.Unmarshal([]byte(secretString.String()),&secretCompleteObject)
+		err := yaml.Unmarshal([]byte(secretString.String()), &secretCompleteObject)
 		if err != nil {
-			fmt.Printf("Failed to decode object %v\n",err)
+			fmt.Printf("Failed to decode object %v\n", err)
 		}
 	}
 
@@ -48,30 +48,30 @@ func readObject() (sComplete SecretYaml, objectType string){
 	Kind = secretCompleteObject["kind"].(string)
 	Type = secretCompleteObject["type"].(string)
 	Data = make(map[string]string)
-	
+
 	if OutputType == "json" {
-		convertJsonInterfaceObject(secretCompleteObject["data"].(map[string]interface {}))
+		convertJsonInterfaceObject(secretCompleteObject["data"].(map[string]interface{}))
 	} else {
-		convertYamlInterfaceObject(secretCompleteObject["data"].(map[interface {}]interface {}))
+		convertYamlInterfaceObject(secretCompleteObject["data"].(map[interface{}]interface{}))
 	}
 
-	verifyObject(strings.ToLower(Kind),"secret")
+	verifyObject(strings.ToLower(Kind), "secret")
 
 	return secretCompleteObject, strings.ToLower(Type)
 }
 
-func convertYamlInterfaceObject(data map[interface {}]interface {}) {
+func convertYamlInterfaceObject(data map[interface{}]interface{}) {
 	for key, value := range data {
 		strKey := fmt.Sprintf("%v", key)
-        strValue := fmt.Sprintf("%v", value)
-        Data[strKey] = strValue
+		strValue := fmt.Sprintf("%v", value)
+		Data[strKey] = strValue
 	}
 }
 
-func convertJsonInterfaceObject(data map[string]interface {}) {
+func convertJsonInterfaceObject(data map[string]interface{}) {
 	for key, value := range data {
-        strValue := fmt.Sprintf("%v", value)
-        Data[key] = strValue
+		strValue := fmt.Sprintf("%v", value)
+		Data[key] = strValue
 	}
 }
 
@@ -83,7 +83,7 @@ func verifyObject(actual string, expected string) {
 	}
 }
 
-func isJson(s string) string{
+func isJson(s string) string {
 	var js interface{}
 	if json.Unmarshal([]byte(s), &js) == nil {
 		return "json"
@@ -101,5 +101,5 @@ func isJson(s string) string{
 // kubernetes.io/tls	data for a TLS client or server
 // bootstrap.kubernetes.io/token	bootstrap token data
 // func identifySecretObjectType(objectType string) string {
-// 
+//
 // }
