@@ -6,23 +6,17 @@ import (
 	"os"
 	"strings"
 
-	yaml "gopkg.in/yaml.v2"
 	json "encoding/json"
+	yaml "gopkg.in/yaml.v2"
 )
-
-type secretData struct {
-	Kind string `yaml:"kind" json:"kind"`
-	Type string `yaml:"type" json:"type"`
-	Data map[string]string `yaml:"data" json:"data"`
-}
 
 type SecretYaml map[string]interface{}
 
-var OutputType string
+var Kind, Type, OutputType string
+var Data map[string]string
 
 // Read secret object from stdin
-func readObject() (yData *secretData, yComplete SecretYaml, objectType string){
-	var secretDataObject secretData
+func readObject() (sComplete SecretYaml, objectType string){
 	var secretCompleteObject SecretYaml
 	var secretString strings.Builder
 	scanner := bufio.NewScanner(os.Stdin)
@@ -38,45 +32,60 @@ func readObject() (yData *secretData, yComplete SecretYaml, objectType string){
 	OutputType = isJson(secretString.String())
 
 	if OutputType == "json" {
-		// only data part
-		err := json.Unmarshal([]byte(secretString.String()),&secretDataObject)
-		if err != nil {
-			fmt.Printf("Failed to decode object %v\n",err)
-		}
-		// complete json object
-		err = json.Unmarshal([]byte(secretString.String()),&secretCompleteObject)
+		err := json.Unmarshal([]byte(secretString.String()),&secretCompleteObject)
 		if err != nil {
 			fmt.Printf("Failed to decode object %v\n",err)
 		}
 
 	} else {
-		// only data part
-		err := yaml.Unmarshal([]byte(secretString.String()),&secretDataObject)
-		if err != nil {
-			fmt.Printf("Failed to decode object %v\n",err)
-		}
-		// complete yaml object
-		err = yaml.Unmarshal([]byte(secretString.String()),&secretCompleteObject)
+		err := yaml.Unmarshal([]byte(secretString.String()),&secretCompleteObject)
 		if err != nil {
 			fmt.Printf("Failed to decode object %v\n",err)
 		}
 	}
 
-	if !isSecretObject(&secretDataObject) {
+	// set secret objects
+	Kind = secretCompleteObject["kind"].(string)
+	Type = secretCompleteObject["type"].(string)
+	Data = make(map[string]string)
+	
+	if OutputType == "json" {
+		convertJsonInterfaceObject(secretCompleteObject["data"].(map[string]interface {}))
+	} else {
+		convertYamlInterfaceObject(secretCompleteObject["data"].(map[interface {}]interface {}))
+	}
+
+	verifyObject(strings.ToLower(Kind),"secret")
+
+	return secretCompleteObject, strings.ToLower(Type)
+}
+
+func convertYamlInterfaceObject(data map[interface {}]interface {}) {
+	for key, value := range data {
+		strKey := fmt.Sprintf("%v", key)
+        strValue := fmt.Sprintf("%v", value)
+        Data[strKey] = strValue
+	}
+}
+
+func convertJsonInterfaceObject(data map[string]interface {}) {
+	for key, value := range data {
+        strValue := fmt.Sprintf("%v", value)
+        Data[key] = strValue
+	}
+}
+
+// Verify object
+func verifyObject(actual string, expected string) {
+	if actual != expected {
 		fmt.Println("The given object is not a Secret object")
 		return
 	}
-	return &secretDataObject, secretCompleteObject, strings.ToLower(secretDataObject.Type)
-}
-
-// Validate the secret object kind
-func isSecretObject(y *secretData) bool {
-	return strings.ToLower(y.Kind) == "secret"
 }
 
 func isJson(s string) string{
 	var js interface{}
-	if json.Unmarshal([]byte(s),&js) == nil {
+	if json.Unmarshal([]byte(s), &js) == nil {
 		return "json"
 	}
 	return "nil"

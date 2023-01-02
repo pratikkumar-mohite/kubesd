@@ -9,18 +9,18 @@ import (
 
 const dataObject = "data"
 
-func printSecretObject(yData *secretData, yComplete SecretYaml){
+func printSecretObject(s SecretYaml){
 	var object []uint8
 	var err error
-	for key := range yComplete {
+	for key := range s {
 		if key == dataObject {
-			yComplete[key] = yData.Data
+			s[key] = Data
 		}
 	}
 	if OutputType == "json" {
-		object, err = json.MarshalIndent(yComplete,"","\t")
+		object, err = json.MarshalIndent(s,"","\t")
 	} else {
-		object, err = yaml.Marshal(yComplete)
+		object, err = yaml.Marshal(s)
 	}
 	if err != nil {
 		fmt.Printf("Failed to encode the secret object while printing %v\n",err)

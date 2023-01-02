@@ -7,23 +7,24 @@ import (
 
 // Decode the data to secret object
 func decodeBase64(value string) string {
-	keyval, err := base64.StdEncoding.DecodeString(value)
+	decodedData, err := base64.StdEncoding.DecodeString(value)
 	if err != nil {
 		fmt.Printf("Failed to decode object %v",err)
 	}
-	return string(keyval)
+	return string(decodedData)
 }
 
-func decodeOpaque(y *secretData) {
-	for key, value := range y.Data {
-		y.Data[key] = decodeBase64(value)
+// Opaque : arbitrary user-defined data
+func decodeOpaque() {
+	for key, value := range Data {
+		Data[key] = decodeBase64(value)
 	}
 }
 
 func Decode() {
-	yamlDataObject, yamlCompleteObject, objectType := readObject()
+	secretCompleteObject, objectType := readObject()
 	if objectType == "opaque" {
-		decodeOpaque(yamlDataObject)
+		decodeOpaque()
 	}
-	printSecretObject(yamlDataObject, yamlCompleteObject)
+	printSecretObject(secretCompleteObject)
 }
