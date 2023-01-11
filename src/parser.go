@@ -15,6 +15,8 @@ type SecretYaml map[string]interface{}
 var Kind, Type, OutputType string
 var Data map[string]string
 
+var isStringData = false 
+
 // Read secret object from stdin
 func readObject() (sComplete SecretYaml, objectType string) {
 	var secretCompleteObject SecretYaml
@@ -47,12 +49,23 @@ func readObject() (sComplete SecretYaml, objectType string) {
 	// set secret objects
 	Kind = secretCompleteObject["kind"].(string)
 	Type = secretCompleteObject["type"].(string)
+	var data = secretCompleteObject["data"]
+	var stringData = secretCompleteObject["stringData"]
+
+	if data == nil && stringData == nil{
+		fmt.Println("No valid data field found")
+		return
+	} else if data == nil {
+		isStringData = true
+		data = stringData
+	}
+
 	Data = make(map[string]string)
 
 	if OutputType == "json" {
-		convertJsonInterfaceObject(secretCompleteObject["data"].(map[string]interface{}))
+		convertJsonInterfaceObject(data.(map[string]interface{}))
 	} else {
-		convertYamlInterfaceObject(secretCompleteObject["data"].(map[interface{}]interface{}))
+		convertYamlInterfaceObject(data.(map[interface{}]interface{}))
 	}
 
 	verifyObject(strings.ToLower(Kind), "secret")

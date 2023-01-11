@@ -8,12 +8,13 @@ import (
 )
 
 const dataObject = "data"
+const stringDataObject = "stringData"
 
 func printSecretObject(s SecretYaml) {
 	var object []uint8
 	var err error
 	for key := range s {
-		if key == dataObject {
+		if key == dataObject || key == stringDataObject {
 			s[key] = Data
 		}
 	}
