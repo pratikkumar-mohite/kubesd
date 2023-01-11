@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: opaque-secret
+type: Opaque
+stringData:
+  USERNAME: admin
+  PASSWORD: admin

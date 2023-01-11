@@ -1,0 +1,13 @@
+{
+    "apiVersion": "v1",
+    "data": {
+        "PASSWORD": "YWRtaW4=",
+        "USERNAME": "YWRtaW4="
+    },
+    "kind": "Secret",
+    "metadata": {
+        "name": "opaque-secret",
+        "namespace": "default"
+    },
+    "type": "Opaque"
+}
