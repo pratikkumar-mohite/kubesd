@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+var supportedObjectTypes = []string{"opaque","kubernetes.io/dockerconfigjson","kubernetes.io/dockercfg"}
+
 // Decode the data to secret object
 func decodeBase64(value string) string {
 	decodedData, err := base64.StdEncoding.DecodeString(value)
@@ -21,13 +23,21 @@ func decodeOpaque() {
 	}
 }
 
+func contains(key string, list []string) bool {
+	for _, value := range list {
+		if value == key {
+			return true
+		}
+	}
+	return false
+}
+
 func Decode() {
 	secretCompleteObject, objectType := readObject()
 	if !isStringData {
-		switch objectType {
-		case "opaque":
+		if contains(objectType, supportedObjectTypes) {
 			decodeOpaque()
-		default:
+		} else {
 			fmt.Printf("Invalid secret object type : %v", objectType)
 			return
 		}
