@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-var supportedObjectTypes = []string{"opaque","kubernetes.io/dockerconfigjson","kubernetes.io/dockercfg"}
+var supportedObjectTypes = []string{"opaque","kubernetes.io/dockerconfigjson","kubernetes.io/dockercfg","kubernetes.io/tls"}
 
 // Decode the data to secret object
 func decodeBase64(value string) string {
