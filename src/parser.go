@@ -10,16 +10,13 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-type SecretYaml map[string]interface{}
-
 var Kind, Type, OutputType string
 var Data map[string]string
 
 var isStringData = false 
 
 // Read secret object from stdin
-func readObject() (sComplete SecretYaml, objectType string) {
-	var secretCompleteObject SecretYaml
+func readObject() (s strings.Builder) {
 	var secretString strings.Builder
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Err() != nil {
@@ -29,28 +26,36 @@ func readObject() (sComplete SecretYaml, objectType string) {
 	for scanner.Scan() {
 		secretString.WriteString(scanner.Text() + "\n")
 	}
+	return secretString
+}
 
+func (sComplete *SecretYaml)unmarshal() (objectType string){
+	var secretString = readObject()
+	
 	// check if data is json
 	OutputType = isJson(secretString.String())
 
 	if OutputType == "json" {
-		err := json.Unmarshal([]byte(secretString.String()), &secretCompleteObject)
+		err := json.Unmarshal([]byte(secretString.String()), &sComplete)
 		if err != nil {
 			fmt.Printf("Failed to decode object %v\n", err)
 		}
 
 	} else {
-		err := yaml.Unmarshal([]byte(secretString.String()), &secretCompleteObject)
+		err := yaml.Unmarshal([]byte(secretString.String()), &sComplete)
 		if err != nil {
 			fmt.Printf("Failed to decode object %v\n", err)
 		}
 	}
 
-	// set secret objects
-	Kind = secretCompleteObject["kind"].(string)
-	Type = secretCompleteObject["type"].(string)
-	var data = secretCompleteObject["data"]
-	var stringData = secretCompleteObject["stringData"]
+	// set secret objects - Kind, Type, Data
+	Kind = (*sComplete)["kind"].(string)
+	verifyObjectKind(strings.ToLower(Kind), "secret")
+
+	Type = (*sComplete)["type"].(string)
+	
+	var data = (*sComplete)["data"]
+	var stringData = (*sComplete)["stringData"]
 
 	if data == nil && stringData == nil{
 		fmt.Println("No valid data field found")
@@ -68,9 +73,7 @@ func readObject() (sComplete SecretYaml, objectType string) {
 		convertYamlInterfaceObject(data.(map[interface{}]interface{}))
 	}
 
-	verifyObject(strings.ToLower(Kind), "secret")
-
-	return secretCompleteObject, strings.ToLower(Type)
+	return strings.ToLower(Type)
 }
 
 func convertYamlInterfaceObject(data map[interface{}]interface{}) {
@@ -88,8 +91,7 @@ func convertJsonInterfaceObject(data map[string]interface{}) {
 	}
 }
 
-// Verify object
-func verifyObject(actual string, expected string) {
+func verifyObjectKind[T comparable](actual T, expected T) {
 	if actual != expected {
 		fmt.Println("The given object is not a Secret object")
 		return

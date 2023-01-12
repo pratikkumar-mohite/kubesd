@@ -15,6 +15,8 @@ import (
 // kubernetes.io/tls	data for a TLS client or server
 // bootstrap.kubernetes.io/token	bootstrap token data
 
+type SecretYaml map[string]interface{}
+
 var supportedObjectTypes = []string{"opaque","kubernetes.io/service-account-token","kubernetes.io/dockercfg","kubernetes.io/dockerconfigjson","kubernetes.io/basic-auth","kubernetes.io/ssh-auth","kubernetes.io/tls","bootstrap.kubernetes.io/token"}
 
 // Decode the data to secret object
@@ -26,14 +28,13 @@ func decodeBase64(value string) string {
 	return string(decodedData)
 }
 
-// Opaque : arbitrary user-defined data
-func decodeOpaque() {
+func decodeData() {
 	for key, value := range Data {
 		Data[key] = decodeBase64(value)
 	}
 }
 
-func contains(key string, list []string) bool {
+func doesListContains(key string, list []string) bool {
 	for _, value := range list {
 		if value == key {
 			return true
@@ -43,14 +44,16 @@ func contains(key string, list []string) bool {
 }
 
 func Decode() {
-	secretCompleteObject, objectType := readObject()
+	var s SecretYaml
+	var objectType = s.unmarshal()
+
 	if !isStringData {
-		if contains(objectType, supportedObjectTypes) {
-			decodeOpaque()
+		if doesListContains(objectType, supportedObjectTypes) {
+			decodeData()
 		} else {
 			fmt.Printf("Invalid secret object type : %v", objectType)
 			return
 		}
 	}
-	printSecretObject(secretCompleteObject)
+	fmt.Println(s.marshal())
 }
