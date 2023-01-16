@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"errors"
 
 	json "encoding/json"
 	yaml "gopkg.in/yaml.v2"
 )
-
-type SecretYaml map[string]interface{}
 
 var Kind, Type, OutputType string
 var Data map[string]string
@@ -18,43 +17,55 @@ var Data map[string]string
 var isStringData = false 
 
 // Read secret object from stdin
-func readObject() (sComplete SecretYaml, objectType string) {
-	var secretCompleteObject SecretYaml
+func readObject() (strings.Builder, error) {
 	var secretString strings.Builder
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Err() != nil {
-		fmt.Printf("Failed to read from STDIN %v\n", scanner.Err())
-		return
+		return strings.Builder{}, scanner.Err()
 	}
 	for scanner.Scan() {
 		secretString.WriteString(scanner.Text() + "\n")
 	}
+	return secretString, nil
+}
 
+func (sComplete *SecretYaml)unmarshal() (string, error){
+	var secretString, err = readObject()
+
+	if err != nil {
+		return "", err
+	}
+	
 	// check if data is json
 	OutputType = isJson(secretString.String())
 
 	if OutputType == "json" {
-		err := json.Unmarshal([]byte(secretString.String()), &secretCompleteObject)
+		err := json.Unmarshal([]byte(secretString.String()), &sComplete)
 		if err != nil {
-			fmt.Printf("Failed to decode object %v\n", err)
+			return "", err
 		}
 
 	} else {
-		err := yaml.Unmarshal([]byte(secretString.String()), &secretCompleteObject)
+		err := yaml.Unmarshal([]byte(secretString.String()), &sComplete)
 		if err != nil {
-			fmt.Printf("Failed to decode object %v\n", err)
+			return "", err
 		}
 	}
 
-	// set secret objects
-	Kind = secretCompleteObject["kind"].(string)
-	Type = secretCompleteObject["type"].(string)
-	var data = secretCompleteObject["data"]
-	var stringData = secretCompleteObject["stringData"]
+	// set secret objects - Kind, Type, Data
+	Kind = (*sComplete)["kind"].(string)
+	err = verifyObjectKind(strings.ToLower(Kind), "secret")
+	if err != nil {
+		return "", err
+	}
+
+	Type = (*sComplete)["type"].(string)
+	
+	var data = (*sComplete)["data"]
+	var stringData = (*sComplete)["stringData"]
 
 	if data == nil && stringData == nil{
-		fmt.Println("No valid data field found")
-		return
+		return "", errors.New("the data/stringData field not found")
 	} else if data == nil {
 		isStringData = true
 		data = stringData
@@ -68,9 +79,7 @@ func readObject() (sComplete SecretYaml, objectType string) {
 		convertYamlInterfaceObject(data.(map[interface{}]interface{}))
 	}
 
-	verifyObject(strings.ToLower(Kind), "secret")
-
-	return secretCompleteObject, strings.ToLower(Type)
+	return strings.ToLower(Type), nil
 }
 
 func convertYamlInterfaceObject(data map[interface{}]interface{}) {
@@ -88,15 +97,14 @@ func convertJsonInterfaceObject(data map[string]interface{}) {
 	}
 }
 
-// Verify object
-func verifyObject(actual string, expected string) {
+func verifyObjectKind[T comparable](actual T, expected T) (error){
 	if actual != expected {
-		fmt.Println("The given object is not a Secret object")
-		return
+		return errors.New("the given object is not a secret object")
 	}
+	return nil
 }
 
-func isJson(s string) string {
+func isJson(s string) (string) {
 	var js interface{}
 	if json.Unmarshal([]byte(s), &js) == nil {
 		return "json"

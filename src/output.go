@@ -1,7 +1,6 @@
 package src
 
 import (
-	"fmt"
 
 	json "encoding/json"
 	yaml "gopkg.in/yaml.v2"
@@ -10,21 +9,23 @@ import (
 const dataObject = "data"
 const stringDataObject = "stringData"
 
-func printSecretObject(s SecretYaml) {
+func (sComplete *SecretYaml)marshal() (string, error){
 	var object []uint8
 	var err error
-	for key := range s {
+
+	for key := range *sComplete {
 		if key == dataObject || key == stringDataObject {
-			s[key] = Data
+			(*sComplete)[key] = Data
 		}
 	}
+
 	if OutputType == "json" {
-		object, err = json.MarshalIndent(s, "", "\t")
+		object, err = json.MarshalIndent(sComplete, "", "\t")
 	} else {
-		object, err = yaml.Marshal(s)
+		object, err = yaml.Marshal(sComplete)
 	}
 	if err != nil {
-		fmt.Printf("Failed to encode the secret object while printing %v\n", err)
+		return "", err
 	}
-	fmt.Println(string(object))
+	return string(object), nil
 }
