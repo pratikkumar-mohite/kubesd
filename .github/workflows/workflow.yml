@@ -25,6 +25,7 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: ${{ matrix.go-version }}
+        cache: true
     # - name: Install dependencies
     #   run: go get .
     - name: Build
