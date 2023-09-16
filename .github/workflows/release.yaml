@@ -16,7 +16,7 @@ jobs:
         uses: TriPSs/conventional-changelog-action@v3
         with:
           github-token: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
-          version-file: './version.yaml'
+          version-file: 'version.yaml'
 
       - name: create release
         uses: actions/create-release@v1
