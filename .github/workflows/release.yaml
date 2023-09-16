@@ -19,8 +19,8 @@ jobs:
           version-file: 'version.yaml'
 
       - name: Create Release
+        id: create_release
         uses: actions/create-release@v1
-        if: ${{ steps.changelog.outputs.skipped == 'false' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
         with:
