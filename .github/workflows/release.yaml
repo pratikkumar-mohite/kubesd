@@ -19,12 +19,10 @@ jobs:
           version-file: './version.yaml'
 
       - name: create release
-        if: steps.changelog.outputs.skipped == 'false'
-        uses: ncipollo/release-action@v1
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
         with:
-          skip-on-empty: 'false'
           token: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
           tag	: ${{ steps.changelog.outputs.tag }}
           name: ${{ steps.changelog.outputs.tag }}
