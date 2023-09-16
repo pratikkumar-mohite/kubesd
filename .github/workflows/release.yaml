@@ -16,7 +16,7 @@ jobs:
         uses: TriPSs/conventional-changelog-action@v3
         with:
           github-token: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
-          version-file: './version.yaml'
+          version-file: 'version.yaml'
 
       - name: create release
         uses: actions/create-release@v1
@@ -24,6 +24,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
         with:
           token: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
-          tag	: ${{ steps.changelog.outputs.tag }}
-          name: ${{ steps.changelog.outputs.tag }}
+          tag_name	: ${{ steps.changelog.outputs.tag }}
+          release_name: ${{ steps.changelog.outputs.tag }}
           body: ${{ steps.changelog.outputs.clean_changelog }}
