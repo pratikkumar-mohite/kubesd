@@ -5,9 +5,9 @@ name: workflow
 
 on:
   push:
-    branches: [ "workflow" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "workflow" ]
+    branches: [ "main" ]
   workflow_dispatch: {}
 
 jobs:
