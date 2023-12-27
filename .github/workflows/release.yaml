@@ -14,6 +14,7 @@ jobs:
 
     - name: Set up Git
       run: |
+        apt-get update git
         git config --local user.email "mohite770.pm@gmail.com"
         git config --local user.name "Pratikkumar Mohite"
 
