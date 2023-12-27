@@ -14,7 +14,7 @@ jobs:
 
     - name: Set up Git
       run: |
-        git config --local user.email "mohite770.pm@gmail.com
+        git config --local user.email "mohite770.pm@gmail.com"
         git config --local user.name "Pratikkumar Mohite"
 
     - name: Create and push Git tag
