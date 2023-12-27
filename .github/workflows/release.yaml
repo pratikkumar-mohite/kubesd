@@ -19,7 +19,7 @@ jobs:
 
     - name: Create and push Git tag
       run: |
-        # Fetch the latest tags
+        # Fetch the latest tags 
         git fetch --tags
 
         # Get the latest tag version
