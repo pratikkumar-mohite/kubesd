@@ -20,9 +20,7 @@ jobs:
     - name: Create and push Git tag
       run: |
         # Fetch the latest tags
-        git fetch --tags
-
-        git describe --tags --abbrev=0        
+        git fetch --tags    
 
       env:
         GITHUB_TOKEN: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
