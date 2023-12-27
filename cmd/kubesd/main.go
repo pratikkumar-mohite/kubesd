@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/pratikkumar-mohite/kubesd/cmd/plugin/cli"
+	"github.com/pratikkumar-mohite/kubesd/cmd/kubesd/cli"
 	"github.com/pratikkumar-mohite/kubesd/pkg/logger"
 )
 
