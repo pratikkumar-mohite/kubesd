@@ -1,4 +1,4 @@
-package src
+package cli
 
 import (
 	base64 "encoding/base64"
@@ -17,7 +17,7 @@ import (
 
 type SecretYaml map[string]interface{}
 
-var supportedObjectTypes = []string{"opaque","kubernetes.io/service-account-token","kubernetes.io/dockercfg","kubernetes.io/dockerconfigjson","kubernetes.io/basic-auth","kubernetes.io/ssh-auth","kubernetes.io/tls","bootstrap.kubernetes.io/token"}
+var supportedObjectTypes = []string{"opaque", "kubernetes.io/service-account-token", "kubernetes.io/dockercfg", "kubernetes.io/dockerconfigjson", "kubernetes.io/basic-auth", "kubernetes.io/ssh-auth", "kubernetes.io/tls", "bootstrap.kubernetes.io/token"}
 
 // Decode the data to secret object
 func decodeBase64(value string) (string, error) {
@@ -28,18 +28,18 @@ func decodeBase64(value string) (string, error) {
 	return string(decodedData), nil
 }
 
-func decodeData() (error){
+func decodeData() error {
 	var err error
 	for key, value := range Data {
 		Data[key], err = decodeBase64(value)
-		if err != nil{
+		if err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func doesListContains(key string, list []string) (bool) {
+func doesListContains(key string, list []string) bool {
 	for _, value := range list {
 		if value == key {
 			return true
@@ -60,7 +60,7 @@ func Decode() (string, error) {
 		if doesListContains(objectType, supportedObjectTypes) {
 			decodeData()
 		} else {
-			return "", errors.New("Invalid secret object type : "+objectType)
+			return "", errors.New("Invalid secret object type : " + objectType)
 		}
 	}
 

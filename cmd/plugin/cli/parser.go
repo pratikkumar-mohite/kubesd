@@ -1,11 +1,11 @@
-package src
+package cli
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
-	"errors"
 
 	json "encoding/json"
 	yaml "gopkg.in/yaml.v2"
@@ -14,7 +14,7 @@ import (
 var Kind, Type, OutputType string
 var Data map[string]string
 
-var isStringData = false 
+var isStringData = false
 
 // Read secret object from stdin
 func readObject() (strings.Builder, error) {
@@ -26,16 +26,19 @@ func readObject() (strings.Builder, error) {
 	for scanner.Scan() {
 		secretString.WriteString(scanner.Text() + "\n")
 	}
+	if secretString.Len() <= 0 {
+		return strings.Builder{}, errors.New("no secret data found")
+	}
 	return secretString, nil
 }
 
-func (sComplete *SecretYaml)unmarshal() (string, error){
+func (sComplete *SecretYaml) unmarshal() (string, error) {
 	var secretString, err = readObject()
 
 	if err != nil {
 		return "", err
 	}
-	
+
 	// check if data is json
 	OutputType = isJson(secretString.String())
 
@@ -60,11 +63,11 @@ func (sComplete *SecretYaml)unmarshal() (string, error){
 	}
 
 	Type = (*sComplete)["type"].(string)
-	
+
 	var data = (*sComplete)["data"]
 	var stringData = (*sComplete)["stringData"]
 
-	if data == nil && stringData == nil{
+	if data == nil && stringData == nil {
 		return "", errors.New("the data/stringData field not found")
 	} else if data == nil {
 		isStringData = true
@@ -97,14 +100,14 @@ func convertJsonInterfaceObject(data map[string]interface{}) {
 	}
 }
 
-func verifyObjectKind[T comparable](actual T, expected T) (error){
+func verifyObjectKind[T comparable](actual T, expected T) error {
 	if actual != expected {
 		return errors.New("the given object is not a secret object")
 	}
 	return nil
 }
 
-func isJson(s string) (string) {
+func isJson(s string) string {
 	var js interface{}
 	if json.Unmarshal([]byte(s), &js) == nil {
 		return "json"

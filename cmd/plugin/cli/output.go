@@ -1,7 +1,6 @@
-package src
+package cli
 
 import (
-
 	json "encoding/json"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -9,7 +8,7 @@ import (
 const dataObject = "data"
 const stringDataObject = "stringData"
 
-func (sComplete *SecretYaml)marshal() (string, error){
+func (sComplete *SecretYaml) marshal() (string, error) {
 	var object []uint8
 	var err error
 
