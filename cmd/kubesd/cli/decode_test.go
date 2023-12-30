@@ -1,21 +1,12 @@
 package cli
 
 import (
-	base64 "encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
 )
-
-func TestDecodeBase64(t *testing.T) {
-	var encodedData = base64.StdEncoding.EncodeToString([]byte("admin"))
-	decodedValue, _ := decodeBase64(encodedData)
-	if decodedValue != "admin" {
-		t.Error("Base64 decode test failed")
-	}
-}
 
 func TestDecode(t *testing.T) {
 	var d string = `apiVersion: v1

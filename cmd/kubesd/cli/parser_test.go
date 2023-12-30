@@ -16,7 +16,7 @@ func TestReadObject(t *testing.T) {
 	defer func() { os.Stdin = oldStdIn }()
 
 	os.Stdin = data
-	s, _ := readObject()
+	s, _ := readObjectFromStdin()
 
 	if s.String() == "" {
 		t.Error("No data from STDIN")

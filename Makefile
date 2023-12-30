@@ -6,7 +6,7 @@ test:
 
 .PHONY: bin
 bin: fmt vet
-	go build -o bin/kubectl-kubesd github.com/pratikkumar-mohite/kubesd/cmd/plugin
+	go build -o bin/kubectl-kubesd github.com/pratikkumar-mohite/kubesd/cmd/kubesd
 
 .PHONY: fmt
 fmt:

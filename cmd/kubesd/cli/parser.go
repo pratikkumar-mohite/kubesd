@@ -17,7 +17,7 @@ var Data map[string]string
 var isStringData = false
 
 // Read secret object from stdin
-func readObject() (strings.Builder, error) {
+func readObjectFromStdin() (strings.Builder, error) {
 	var secretString strings.Builder
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Err() != nil {
@@ -32,8 +32,22 @@ func readObject() (strings.Builder, error) {
 	return secretString, nil
 }
 
-func (sComplete *SecretYaml) unmarshal() (string, error) {
-	var secretString, err = readObject()
+func readObjectFromBuilder(object ...strings.Builder) (strings.Builder, error) {
+	var secretString strings.Builder
+	for _, v := range object {
+		secretString.WriteString(v.String() + "\n")
+	}
+	return secretString, nil
+}
+
+func (sComplete *SecretYaml) unmarshal(object ...strings.Builder) (string, error) {
+	var secretString strings.Builder
+	var err error
+	if len(object) <= 0 {
+		secretString, err = readObjectFromStdin()
+	} else {
+		secretString, err = readObjectFromBuilder(object...)
+	}
 
 	if err != nil {
 		return "", err
@@ -85,11 +99,19 @@ func (sComplete *SecretYaml) unmarshal() (string, error) {
 	return strings.ToLower(Type), nil
 }
 
+func interfaceSliceToByteSlice(interfaceSlice []interface{}) string {
+	var byteSlice []uint8
+	for _, v := range interfaceSlice {
+		byteSlice = append(byteSlice, uint8(v.(int)))
+	}
+	return string(byteSlice)
+}
+
 func convertYamlInterfaceObject(data map[interface{}]interface{}) {
 	for key, value := range data {
 		strKey := fmt.Sprintf("%v", key)
-		strValue := fmt.Sprintf("%v", value)
-		Data[strKey] = strValue
+		strValue := fmt.Sprintf("%v", interfaceSliceToByteSlice(value.([]interface{})))
+		Data[strKey] = string(strValue)
 	}
 }
 

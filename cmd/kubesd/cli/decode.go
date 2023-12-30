@@ -1,8 +1,8 @@
 package cli
 
 import (
-	base64 "encoding/base64"
 	"errors"
+	"strings"
 )
 
 // Secret types: https://kubernetes.io/docs/concepts/configuration/secret/#secret-types
@@ -20,18 +20,11 @@ type SecretYaml map[string]interface{}
 var supportedObjectTypes = []string{"opaque", "kubernetes.io/service-account-token", "kubernetes.io/dockercfg", "kubernetes.io/dockerconfigjson", "kubernetes.io/basic-auth", "kubernetes.io/ssh-auth", "kubernetes.io/tls", "bootstrap.kubernetes.io/token"}
 
 // Decode the data to secret object
-func decodeBase64(value string) (string, error) {
-	decodedData, err := base64.StdEncoding.DecodeString(value)
-	if err != nil {
-		return "", err
-	}
-	return string(decodedData), nil
-}
 
 func decodeData() error {
 	var err error
 	for key, value := range Data {
-		Data[key], err = decodeBase64(value)
+		Data[key] = value
 		if err != nil {
 			return err
 		}
@@ -48,9 +41,9 @@ func doesListContains(key string, list []string) bool {
 	return false
 }
 
-func Decode() (string, error) {
+func Decode(object ...strings.Builder) (string, error) {
 	var s SecretYaml
-	var objectType, err = s.unmarshal()
+	var objectType, err = s.unmarshal(object...)
 
 	if err != nil {
 		return "", err

@@ -18,7 +18,7 @@ func (l *Logger) Info(msg string, args ...interface{}) {
 		return
 	}
 
-	c := color.New(color.FgHiCyan)
+	c := color.New(color.FgHiWhite)
 	c.Println(fmt.Sprintf(msg, args...))
 }
 
